@@ -1,7 +1,7 @@
 ---
 title: "ST4060/ST6040 -- Basic R"
-author: "Statistics, School of Mathematical Sciences, University College Cork"
-date: "2026/27"
+author: "Eric Wolsztynski, Statistics, School of Mathematical Sciences, University College Cork"
+date: "2026-27"
 output: learnr::tutorial
 runtime: shiny_prerendered
 ---
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 Irrespective of the type of problem, science requires reproducibility of the computations carried out, and tracebility of the methodology. R and Python are the most widely used programming languages in data science. They both have pros and cons, and both are very powerful. It is possible to use Python code from within R, and vice-versa.
 
-The R language is particularly well suited to statistics and data science because it is developped by statisticians (and now data scientists) for their peers. Any developments are shared freely and in open source.
+The R language is particularly well suited to Statistics and Data Science because it is developped by statisticians and data scientists for their peers. Any developments are shared freely and in open source.
 
 ### Where to start?
 
