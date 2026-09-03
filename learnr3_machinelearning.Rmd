@@ -1,0 +1,85 @@
+---
+title: "ST4060/ST6040 -- Section 3: Introduction to Machine Learning"
+author: "Statistics, School of Mathematical Sciences, University College Cork"
+date: "2026/27"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(shiny)
+library(ISLR)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+<!-- --------------------------------------------------------------------- -->
+## Classification: logistic regression
+
+Recall from the notes: logistic regression is a particular case of GLM used
+for classification. Here we use the `Default` dataset (library `ISLR`), where
+the response `default` indicates whether a credit card customer defaulted.
+
+**Exercise 1:** fit a logistic regression of `default` on `balance` using
+`glm()` with `family="binomial"`, and interpret the sign and significance of
+the coefficient on `balance`.
+
+```{r logreg-1, exercise = TRUE, exercise.lines = 8}
+
+```
+
+```{r logreg-1-solution}
+glmo = glm(default~balance, data=Default, family="binomial")
+summary(glmo)
+# positive, highly significant coefficient on balance:
+# higher balance is associated with higher probability of default
+```
+
+**Exercise 2:** extend the model of Exercise 1 to also include `income` and
+`student`. Has the effect of `balance` changed much? What do you make of the
+coefficient on `student`?
+
+```{r logreg-2, exercise = TRUE, exercise.lines = 8}
+
+```
+
+```{r logreg-2-solution}
+glmo = glm(default~balance+income+student, data=Default, family="binomial")
+summary(glmo)
+```
+
+**Exercise 3:** split `Default` into a training set (70% of observations) and
+a test set (the remaining 30%). Fit the model of Exercise 2 on the training
+set only, then use it to predict `default` on the test set (recall
+`predict(..., type="response")` returns estimated probabilities, which you
+need to threshold at 0.5 to obtain class predictions). Compute the confusion
+matrix and the test error rate.
+
+```{r logreg-3, exercise = TRUE, exercise.lines = 15}
+
+```
+
+```{r logreg-3-hint}
+set.seed(1)
+itrain = sample(1:nrow(Default), round(.7*nrow(Default)))
+train = Default[itrain,]
+test  = Default[-itrain,]
+
+glmo = glm(default~balance+income+student, data=train, family="binomial")
+probs = predict(glmo, newdata=test, type="response")
+preds = ifelse(probs>0.5, "Yes", "No")
+
+table(predicted=preds, actual=test$default)
+mean(preds != test$default) # test error rate
+```
+
+**Exercise 4:** the *null* classifier that always predicts "No" (i.e. never
+predicts a default) can already achieve a low error rate here, simply because
+defaults are rare in this dataset. Compute this null error rate on the test
+set, and compare it with the error rate obtained in Exercise 3. What does this
+tell you about the limits of overall error rate as a performance measure for
+imbalanced classification problems?
+
+```{r logreg-4, exercise = TRUE, exercise.lines = 8}
+
+```

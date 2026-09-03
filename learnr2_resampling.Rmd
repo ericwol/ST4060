@@ -1,0 +1,143 @@
+---
+title: "ST4060/ST6040 -- Section 2: Resampling"
+author: "Statistics, School of Mathematical Sciences, University College Cork"
+date: "2026/27"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(shiny)
+library(ISLR)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+<!-- --------------------------------------------------------------------- -->
+## Monte Carlo simulations
+
+**Exercise 1:** generate `M=1000` random samples of `N=100` points from the Normal distribution $\mathcal{N}(\mu=5,\sigma^2=4)$. For each of these `M` samples, compute and store its mean. Then:
+
+a. Compute the average of these `M` sample means; is this what you expected?
+
+b. Compute the standard deviation of these `M` sample means; is this what you expected?
+
+c. Look at the sampling distribution of these; is this what you expected?
+  
+```{r mc-1, exercise = TRUE, exercise.lines = 15}
+
+```
+
+**Exercise 2:** compute an approximate 95% confidence interval for the sample mean in the context of Exercise 1.
+
+```{r mc-2, exercise = TRUE, exercise.lines = 15}
+
+```
+
+**Exercise 3:** generate `M=1000` random samples of `N=100` points from the $\chi^2$ distribution with $d=3$ degrees of freedom, and compute the average of the `M` sample means. What can you say about this estimator?
+
+```{r mc-3, exercise = TRUE, exercise.lines = 15}
+
+```
+
+**Exercise 4:** repeat Exercise 3, but now using respectively $d=5$ and $d=7$. Explore the respective sample mean distributions and comment on your findings. Why is this Monte Carlo simulation useful?
+
+```{r mc-4, exercise = TRUE, exercise.lines = 15}
+
+```
+
+<!-- --------------------------------------------------------------------- -->
+## Bootstrapping
+
+**Exercise 1:** compute a non-parametric 95% confidence interval for the sample mean of car stopping distances (`dist`) in the `cars` dataset.
+
+```{r bs-1, exercise = TRUE, exercise.lines = 15}
+
+```
+
+**Exercise 2:** compute a bootstrap estimate of the standard deviation in car speeds (`speed`) in the `cars` dataset.
+
+```{r bs-2, exercise = TRUE, exercise.lines = 15}
+
+```
+
+**Exercise 3:** compute a non-parametric 95% confidence interval for the regression parameters in a linear regression of car stopping distance (`dist`) with respect to car speed (`speed`) in the `cars` dataset.
+
+```{r bs-3, exercise = TRUE, exercise.lines = 15}
+
+```
+
+```{r bs-3-hint}
+# run BS on linreg
+COEF = matrix(NA,10000,2)
+# for(s in 1:nrow(COEF)){
+# 	I = sample(...)
+# 	COEF[s,] = lm(dist~speed, data=...)$...
+# }
+# then inspect distribution of BS estimates
+par(mfrow=c(1,2))
+#
+hist
+quantile
+abline
+```
+
+
+<!-- --------------------------------------------------------------------- -->
+## Cross-validation
+
+**Exercise 1:** compute a leave-one-out cross-validation estimate for the  prediction error of a linear regression model used for prediction of car stopping distance in the `cars` dataset.
+
+```{r cv-1, exercise = TRUE, exercise.lines = 15}
+
+```
+
+```{r cv-1-hint}
+N = nrow(cars)
+for(i in 1:N){
+  loo.dat = cars[-i,]
+  test.dat = cars[i,]
+  lmo = lm(......)
+  test.prediction = predict(lmo, .......)
+  ......
+}
+estimated.prediction.error = ......
+```
+
+
+**Exercise 2:** compute a 10-fold cross-validation estimate for the prediction error of a linear regression model used for prediction of car stopping distance in the `cars` dataset.
+
+```{r cv-2, exercise = TRUE, exercise.lines = 15}
+
+```
+
+```{r cv-2-hint}
+# one can use
+folds <- sample( rep(1:10, each=5) )
+# or
+folds <- cut(seq(1,n), breaks=10, labels=FALSE)
+# to create folds:
+y[folds==1] # would be the first fold (y should be scrambled first if using option 2)
+
+```
+
+**Exercise 3:** using the `Auto` dataset (library `ISLR`), compare LOOCV and 10-fold CV estimates of prediction error for a simple linear regression of `mpg` on `horsepower`. Then repeat this for polynomial regression of `mpg` on `horsepower`, for polynomial orders 1 to 10, and plot the estimated prediction error curve against polynomial order for both CV strategies. Comment on the shape of the two curves and on the agreement (or disagreement) between them.
+
+```{r cv-3, exercise = TRUE, exercise.lines = 15}
+
+```
+
+```{r cv-3-hint}
+library(ISLR)
+attach(Auto)
+degrees = 1:10
+loocv.err = kfold.err = numeric(length(degrees))
+# for(d in degrees){
+# 	lm.fit = glm(mpg~poly(horsepower,d), data=Auto)
+# 	loocv.err[d] = ...... # cf. cv.glm(Auto, lm.fit)$delta[1] from library(boot)
+# 	kfold.err[d] = ...... # cf. cv.glm(Auto, lm.fit, K=10)$delta[1]
+# }
+plot(degrees, loocv.err, t='b', pch=20, ylab="Estimated prediction error")
+lines(degrees, kfold.err, t='b', pch=20, col=2)
+legend("topright", legend=c("LOOCV","10-fold CV"), col=c(1,2), lwd=2)
+```

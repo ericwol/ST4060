@@ -1,0 +1,217 @@
+---
+title: "ST4060/ST6040 -- Basic R"
+author: "Statistics, School of Mathematical Sciences, University College Cork"
+date: "2026/27"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(shiny)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+<!-- --------------------------------------------------------------------- -->
+## General introduction
+
+### Why R?
+
+Irrespective of the type of problem, science requires reproducibility of the computations carried out, and tracebility of the methodology. R and Python are the most widely used programming languages in data science. They both have pros and cons, and both are very powerful. It is possible to use Python code from within R, and vice-versa.
+
+The R language is particularly well suited to statistics and data science because it is developped by statisticians (and now data scientists) for their peers. Any developments are shared freely and in open source.
+
+### Where to start?
+
+We'll start by reviewing things we know, so that we all get properly acquainted with R. Once we're in a good place with R, we can do some more cool stuff.
+
+<!-- --------------------------------------------------------------------- -->
+## R basics
+
+### Basic operations and data types
+
+**Exercise:** Write some R code to add two plus two.
+
+```{r two-plus-two, exercise=TRUE, exercise.lines = 5}
+
+```
+
+```{r two-plus-two-hint}
+# could be
+2+2
+# or
+a=2
+b=2
+a+b
+# and with fancy output
+cat('a+b =',a+b)
+```
+
+**Exercise:** modify the following code to limit the number of rows printed to 5:
+
+```{r print-limit, exercise=TRUE, exercise.eval=TRUE}
+mtcars
+```
+
+```{r print-limit-hint}
+head(mtcars, n=5)
+```
+
+### Packages and help
+
+**Quiz:** Some questions about your understanding of the R environment...
+
+```{r quizzzz}
+quiz(
+  question("R's home is CRAN (the Comprehensive R Archive Network), at https://cran.r-project.org/.",
+    answer("true", correct = TRUE)
+  ),
+  question("The basic R distribution comes with base libraries, and many more libraries can be downloaded and used freely.",
+    answer("true", correct = TRUE)
+  ),
+  question("Which package contains the core functions and operators (such as =, !, +, .C, ?, as.double, as.numeric, axis, plot, barplot, dnorm, anova, etc.)  of the R environment, along with some useful datasets (cars, co2, iris, etc.)?",
+    answer("base", correct = TRUE),
+    answer("tools"),
+    answer("utils"),
+    answer("codetools")
+  ),
+  question("Which package contains functions for installing other R packages?",
+    answer("base"),
+    answer("tools"),
+    answer("utils", correct = TRUE),
+    answer("codetools")
+  ),
+  question("Which of the R packages listed below are used to create plots?",
+    answer("lattice", correct = TRUE),
+    answer("tools"),
+    answer("stats"),
+    answer("grid", correct = TRUE)
+  ),
+  question("Which of these packages also makes graphs?",
+      answer("tidyr"),
+      answer("dplyr"),
+      answer("ggplot2", correct = TRUE),
+      answer("purrr", message = "But the name is cool, isn't it?")
+  )   
+)
+```
+
+**Exercise:** get help on the dataset `cars`.
+  
+```{r help, exercise = TRUE, exercise.lines = 2}
+
+```
+
+
+<!-- --------------------------------------------------------------------- -->
+## Plotting in R
+
+**Exercise:** plot `y=cars$dist` against `x=cars$speed` using `plot()`.
+  
+```{r plotex-1, exercise = TRUE, exercise.lines = 3}
+
+```
+
+```{r plotex-1-solution}
+plot(cars$speed, cars$dist, pch=20, col=4)
+# or using the ggplot2 package:
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ,
+                            y = hwy))
+```
+
+**Exercise:** now make that plot look nice enough to be included in a scientific report.
+  
+```{r plotex-2, exercise = TRUE, exercise.lines = 7}
+
+```
+
+```{r plotex-2-solution}
+par(font=2, font.lab=2, font.axis=2)
+plot(cars$speed, cars$dist, pch=20, col=1, cex=1.2,
+     main='A nicer plot',
+     xlab='Car speed (mph)',
+     ylab='Car stopping distance (ft)')
+```
+
+**Exercise:** produce a histogram of car stopping distances.
+  
+```{r plotex-3, exercise = TRUE, exercise.lines = 6}
+
+```
+
+```{r plotex-3-solution}
+par(font=2, font.lab=2, font.axis=2)
+hist(cars$dist, col='navy',
+     main='Stopping distances (ft)',
+     xlab='Car stopping distance (ft)')
+```
+
+**Exercise:** now add a red curve to this histogram that shows an estimate of the pdf of these sample points...
+  
+```{r plotex-4, exercise = TRUE, exercise.lines = 6}
+
+```
+
+```{r plotex-4-solution}
+par(font=2, font.lab=2, font.axis=2)
+hist(cars$dist, col='navy', freq=FALSE,
+     main='Stopping distances (ft)',
+     xlab='Car stopping distance (ft)')
+lines(density(cars$dist), lwd=3, col=2)
+```
+
+
+<!-- --------------------------------------------------------------------- -->
+##  Input/Output (I/O)
+
+### Other input/output functions
+
+The below examples show you how to *import* a dataset (available as a `.csv` file in these examples) into the R environment. Many other functions are available to load other types of data. 
+
+As for *exporting* output, there are also many functions at our disposal. For example to write the content of a data frame into a `.csv` file, use `write.csv()`. To store a plot in a `.pdf` file, use `pdf()` (and don't forget to close the pdf device at the end of your plot instructions with `dev.off()`). See more in R tutorials or online. 
+
+
+**Exercise:** load a dataset (for example, cars.csv or another csv file made available for the course) into R and inspect it. Hint: use `read.csv()`. You can either specify a file path for a file that is stored somewhere on your own computer (read.csv(file="C://....")), or provide a URL (read.csv(file="http://....")).
+  
+```{r io1, exercise = TRUE, exercise.lines = 6}
+
+```
+
+```{r io1-solution}
+dat = read.csv(file='cars.csv')
+head(dat)
+```
+
+
+**Exercise:** try this on your own computer--plot something, and save the figure as a pdf file (so that you can use it whenever you write your report/paper/thesis/shopping list/etc).
+  
+```{r io3, exercise = TRUE, exercise.lines = 6}
+
+```
+
+```{r io3-solution}
+
+pdf(file="wherever/the/file/should/be.pdf") # create the pdf file
+plot(dist~speed, data=cars, pch=20) # plot...
+dev.off() # close the pdf file after writing into it
+```
+
+
+<!-- --------------------------------------------------------------------- -->
+## Functions in R
+
+**Exercise:** Recall the R code required to add two plus two... Now write a function that adds any two numbers and then use it.
+
+```{r add-function, exercise=TRUE, exercise.lines = 10}
+add <- function() {
+  
+}
+```
+
+```{r add-function-solution}
+add <- function(a, b) {
+  return( a+b )  
+}
+```
+

@@ -1,0 +1,741 @@
+---
+title: "ST4060/ST6040 -- Section 1: Statistical Modelling and Regression"
+author: "Statistics, School of Mathematical Sciences, University College Cork"
+date: "2026-27"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(shiny)
+library(car)
+library(ISLR)
+library(glmnet)
+library(splines)
+library(MortalityLaws)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+<!-- --------------------------------------------------------------------- -->
+## Distributions and data simulation
+
+**Exercise:** play with the Standard Normal distribution.
+
+```{r norm1, exercise=TRUE, exercise.lines = 15}
+
+
+```
+
+```{r norm1-solution}
+x = seq(-3,3,length=1000)
+y = dnorm(x)
+plot(x, y, t='l', lwd=2)
+rnorm(10) # randomly generates 10 realizations of $\mathcal{N}(0,1)$
+dnorm(0) == 1/ sqrt(2*pi)
+pnorm(1.645) # returns 0.9500151
+qnorm(0.95) # returns 1.644854
+
+```
+
+
+**Exercise:** generate a random sample of 100 points from the Normal distribution N(2,10) and visualise appropriate summaries for this sample.
+
+```{r norm2, exercise=TRUE, exercise.lines = 15}
+
+
+```
+
+```{r norm2-solution}
+x = rnorm(100,2,10)
+hist(x, col='navy', freq=FALSE)
+lines(density(x), lwd=3, col=2)
+boxplot(x)
+
+```
+
+**Exercise:** generate *the same* random sample of 100 points from the Normal distribution N(2,10) *twice* (call one of these samples `x1` and the other `x2`).
+
+```{r norm3, exercise=TRUE, exercise.lines = 8}
+
+
+```
+
+```{r norm3-solution}
+set.seed(1)
+x1 = rnorm(100,2,10)
+set.seed(1)
+x2 = rnorm(100,2,10)
+summary(x1)
+summary(x2)
+
+```
+
+
+**Exercise:** generate 2 samples, each comprising of 1,000 realizations of an Exponential distribution, using rate parameters 1 and 5 respectively. Plot their respective histograms next to each other (you can use **par(mfrow=c(1,2))** to do that), and using the same range for the x- and y-axes.
+
+```{r exp1, exercise=TRUE, exercise.lines = 15}
+
+
+```
+
+```{r exp1-solution}
+N = 1000
+x1 = rexp(N,1)
+x5 = rexp(N,5)
+par(mfrow=c(1,2))
+hist(x1, col=8, main="Using rate = 1", xlim=c(0,10), ylim=c(0,550))
+hist(x5, col='pink', main="Using rate = 5", xlim=c(0,10), ylim=c(0,550))
+```
+
+
+<!-- --------------------------------------------------------------------- -->
+## Linear regression
+
+### Ordinary least squares estimation
+
+**Exercise 1:** perform linear regression of `y=cars$dist` against `x=cars$speed` using `lm()`.
+  
+```{r linreg-1, exercise = TRUE, exercise.lines = 8}
+
+```
+
+```{r linreg-1-solution}
+olm = lm(cars$dist~cars$speed)
+summary(olm)
+```
+
+**Exercise 2:** perform linear regression of `y=cars$dist` against `x=cars$speed` using `lm()`, this time with no intercept. Compare with output from the first exercise.
+  
+```{r linreg-2, exercise = TRUE, exercise.lines = 8}
+
+```
+
+```{r linreg-2-solution}
+olm1 = lm(cars$dist~cars$speed+0)
+summary(olm1)
+olm = lm(cars$dist~cars$speed)
+summary(olm)
+```
+
+**Exercise 3:** perform linear regression of `y=cars$dist` against `x=cars$speed` as in Exercise 1, and plot the line of best fit over the data.
+  
+```{r linreg-3, exercise = TRUE, exercise.lines = 8}
+
+```
+
+```{r linreg-3-solution}
+olm = lm(cars$dist~cars$speed)
+summary(olm)
+plot(cars$speed, cars$dist, pch=20, col=8)
+abline(olm, lwd=2, col=4)
+```
+
+**Exercise 4:** obtain the residuals from the fit of Exercise 1, and generate a histogram of their distribution. 
+  
+```{r linreg-4, exercise = TRUE, exercise.lines = 8}
+
+```
+
+```{r linreg-4-solution}
+olm = lm(cars$dist~cars$speed)
+summary(olm)
+hist(olm$residuals, col='navy', breaks=21)
+```
+
+**Exercise 5:** further inspect the residuals from Exercise 4, and their distribution, and comment on your findings. 
+  
+```{r linreg-5, exercise = TRUE, exercise.lines = 15}
+
+```
+
+
+**Exercise 6:** take a closer look at the criterion used for linear regression in Exercise 2 (i.e. without an intercept) - in particular, plot its curve with respect to the model parameter (i.e. the regression slope). 
+  
+```{r linreg-6, exercise = TRUE, exercise.lines = 15}
+
+```
+
+
+
+
+<!-- --------------------------------------------------------------------- -->
+## R scripting
+
+It is now time to get practice at writing your own, full R script in R or RStudio. Here is a walkthrough to show you how. In this example we'll recreate the steps taken to perform linear regression on the `cars` dataset in the previous section.
+
+* First you need to launch R or RStudio, and create a new (script) file. Another good thing to do is to create a folder on your drive, dedicated to this particular analysis. Save your R script (i.e. file) in that location; save it e.g. as `myRscript.R`. 
+* Start your `R` script by loading any library that is useful for your analysis. For this example you need to include the `car` library using 
+`library(car)`.
+* Now regroup the relevant `R` instructions used in Exercises 1 to 5 in the 'Linear regression' section. Your `R` script should look like the block below:
+```{r echo = TRUE, eval = FALSE}
+# ------------ Beginning of myRscript.R ------------
+# library(car)
+
+# performing linear regression
+olm = lm(cars$dist~cars$speed)
+summary(olm)
+
+# plotting linear regression output
+plot(cars$speed, cars$dist, pch=20, col=8)
+abline(olm, lwd=2, col=4)
+
+# inspecting residuals
+hist(olm$residuals, col='navy', breaks=21)
+boxplot(olm$residuals, col=8)
+summary(olm$residuals)
+par(new=TRUE)
+qqnorm(scale(olm$residuals), pch=20)
+abline(a=0,b=1)
+
+# saving the histogram to file
+pdf(file='myRplot.pdf') # open the pdf output file for writing
+hist(olm$residuals, col='navy', breaks=21)
+# don't forget to close the pdf output when finished plotting:
+dev.off() 
+# ... otherwise the output file won't be readable!
+# ------------ End of myRscript.R ------------
+```
+* Note the use of comments - it is good practice to leave comments throughout a script, because: (1) you may pass this script on to a colleague; (2) your own self may need reminding of specific points when you go back to this same script a few months later!
+* Note also the last section of the `R` script, which shows an example of how to save a plot to file - it's always very useful to be able to find those plots without having to re-run a whole `R` script, especially when preparing reports and presentations.  
+
+Having an `R` script to run this analysis now makes your work communicable, reproducible, verifiable, and thus more reliable! If you need to run your script, you can either do it by opening the file in R or RStudio and running it, or by using the instruction `source('myRscript.R')` from within another `R` script. 
+
+
+
+
+<!-- --------------------------------------------------------------------- -->
+## Generalized Linear Models
+
+**Exercise:** here we consider the `mtcars` dataset. Fit a generalized linear model to the data, modelling `mpg` as a function of both engine displacement `disp` and transmission type `am`; interpret the values of the intercept and of the model parameter estimates. 
+  
+```{r glm, exercise = TRUE, exercise.lines = 15}
+
+```
+
+```{r glm-hint}
+glmo <- glm(mpg ~ disp + am, data = mtcars, family = gaussian)
+summary(glmo)
+```
+
+```{r glm-solution}
+glmo <- glm(mpg ~ disp + am, data = mtcars, family = gaussian)
+summary(glmo)
+# - intercept indicates that an automatic car with a displacement of 0 is predicted to have a fuel economy of 27.8 mpg
+# - cars with higher displacement (engine) have a lower fuel economy (t-value for disp is negative) 
+# - manual cars have a higher fuel economy (variable effect is positive) 
+# Also assess significance...
+```
+
+
+
+<!-- --------------------------------------------------------------------- -->
+## Nonlinear regression
+
+**Exercise 1:** implement a quadratic polynomial regression for the `cars` dataset, explaining `y=cars$distance` with `x=cars$speed`. Interpret the output. *Hint:* use `I()` in the formula and try to guess the order of the polynomial from the plot.
+
+```{r nl-1, exercise = TRUE, exercise.lines = 8}
+
+```
+
+```{r nl-1-solution}
+x = cars$speed
+y = cars$dist
+lm.out = lm(y~x+I(x^2))
+summary(lm.out)
+```
+
+
+**Exercise 2:** implement a polynomial regression to obtain the plot below for the `pressure` dataset. *Hint 1:* use `I()` in the formula and try to guess the order of the polynomial from the plot. *Hint 2:* the output of `lm` includes a component called `fitted` which is pretty useful. `lines()` can be used here too for the red curve.
+
+```{r nl-2, exercise = TRUE, exercise.lines = 8}
+x = pressure$temperature
+y = pressure$pressure
+ par(font=2, font.lab=2, font.axis=2)
+ plot(x, y, pch=20, cex=1.2,
+  main='Example: polynomial regression',
+  xlab='Temperature (Celsius)',
+  ylab='Vapor pressure (ml of mercury)')
+```
+
+```{r nl-2-hint}
+I(x^2)
+lines
+lm.out$fitted
+```
+
+```{r nl-2-solution}
+lm.out = lm(y~x+I(x^2)+I(x^3))
+lines(x, lm.out$fitted, lwd=2, col=2)
+```
+
+Now on to proper nonlinear models...
+
+**Exercise 3:** use `nls()` to fit an exponential model 
+$$
+Y = exp(a+bX) + \varepsilon
+$$
+in the `pressure` example, where `x = pressure$temperature` and `y = pressure$pressure`. Use starting values `start=list(a=0,b=.5)`.  Interpret the output. 
+
+```{r nl-3, exercise = TRUE, exercise.lines = 8}
+
+```
+
+```{r nl-3-solution}
+x = pressure$temperature
+y = pressure$pressure
+nlreg <- nls(y~exp(a+b*x), start=list(a=0,b=.5))
+```
+
+**Exercise 4:** do as in Exercise 3 but now using starting values of 0 and 0.02 respectively for `a` and `b`.
+
+```{r nl-4, exercise = TRUE, exercise.lines=8}
+
+```
+
+```{r nl-4-solution}
+x = pressure$temperature
+y = pressure$pressure
+nlreg <- nls(y~exp(a+b*x), start=list(a=0,b=.02))
+summary(nlreg)
+```
+
+
+**Exercise 5:** now plot data points and model fit obtained in Exercise 4.
+
+```{r nl-5, exercise = TRUE, exercise.lines=15}
+
+```
+
+```{r nl-5-solution}
+x = pressure$temperature
+y = pressure$pressure
+nlreg <- nls(y~exp(a+b*x), start=list(a=0,b=.02))
+summary(nlreg)
+cc = coef(nlreg)
+
+par(font=2, font.lab=2, font.axis=2)
+plot(x, y, pch=20, cex=2,
+  xlab="Temperature (Celsius)", 
+  ylab="Vapor pressure (ml of mercury)",
+  main="Example: polynomial regression")
+curve(exp(cc[1]+cc[2]*x), col='blue', add=T, lwd=3)
+```
+
+**Exercise 6:** here we analyse R's US population dataset `car::USPop`. Start by running `library(car)` in order to load library in the session environment. Then plot `y = USPop$population` against `x = USPop$year`. Then declare `tt <- 0:21`. (The above steps are reproduced below to help you.) Your task is to fit the nonlinear model 
+$$
+Y = \frac{\beta_1}{1+exp(\beta_2+\beta_3 x)} + \varepsilon
+$$
+where $x$ is now the vector of times `tt` in the model evaluation.
+
+```{r nl-6, exercise = TRUE, exercise.lines=15}
+x = USPop$year
+y = USPop$population
+# plot
+tt <- 0:21
+
+```
+
+```{r nl-6-solution}
+x = USPop$year
+y = USPop$population
+tt <- 0:21
+pop.mod <- nls(population ~ beta1/(1 + exp(beta2 + beta3*tt)),
+  data=USPop,
+  start=list(beta1 = 350, beta2 = 4.5, beta3 = -0.3),
+  trace=TRUE)
+
+summary(pop.mod)
+```
+
+**Exercise 7:** produce a nice plot of the output of Exercise 6. 
+
+
+```{r nl-7, exercise = TRUE, exercise.lines=15}
+
+```
+
+```{r nl-7-solution}
+x = USPop$year
+y = USPop$population
+tt <- 0:21
+pop.mod <- nls(population ~ beta1/(1 + exp(beta2 + beta3*tt)),
+  data=USPop,
+  start=list(beta1 = 350, beta2 = 4.5, beta3 = -0.3),
+  trace=TRUE)
+
+plot(USPop$year, USPop$population, cex=1.5, pch=20,
+     main='Example: nonlinear regression (USpop data)')
+lines(USPop$year, fitted.values(pop.mod), lwd=3, col=2)
+```
+
+**Exercise 8:** Going about optimising your own cost function... why does the code below not work?
+
+```{r optim-1, echo = TRUE, eval=FALSE}
+model <- function(x, theta){
+     return(theta*x)
+}
+
+crit <- function(theta,x,y){
+# must have theta as 1st parameter and return a single value
+     return( sum( y-model(x,theta) ) )
+}
+
+thbar = 1.8
+x = rep(c(1,3,7,8), length=100)
+y = model(x,thbar) + rnorm(x)
+
+par(mfrow=c(1,2), font.lab=2, font.axis=2)
+plot(x, y, pch=20, cex=1.5, main='optim example 1: data')
+points(x,model(x,thbar),col='green',pch=20,cex=2)
+
+(optim.out <- optim(par=c(1), fn=crit, x=x, y=y,
+     method='L-BFGS-B', lower=c(0.01), upper=c(3.05)))
+```
+
+
+**Exercise 9:** Fix the bug in Exercise 8 and plot the cost function as a function of the model parameter.
+
+```{r optim-2, exercise = TRUE}
+
+```
+
+```{r optim-2-hint}
+model <- function(x, theta){
+     return(theta*x)
+}
+
+crit <- function(theta,x,y){
+# must have theta as 1st parameter and return a single value
+     return( )
+}
+
+thbar = 1.8
+x = rep(c(1,3,7,8), length=100)
+y = model(x,thbar) + rnorm(x)
+
+par(mfrow=c(1,2), font.lab=2, font.axis=2)
+plot(x, y, pch=20, cex=1.5, main='optim example 1: data')
+points(x,model(x,thbar),col='green',pch=20,cex=2)
+
+ths = seq(0,5,len=50)
+obj = 0*ths
+for(i in 1:length(ths)){ 
+  obj[i] = crit(ths[i],x,y) 
+} 
+plot(ths, obj, main='Criterion...', xlab='theta',
+     ylab='Objective value')
+points(optim.out$par, crit(optim.out$par,x,y), col=2, pch=20, cex=3)
+```
+
+
+**Exercise 10:** Fix the bug in Exercise 8 and optimise the cost function using `optim()` with `method='L-BFGS-B', lower=c(0.01), upper=c(3.05)`.
+
+```{r optim-3, exercise = TRUE}
+
+```
+
+```{r optim-3-hint}
+model <- function(x, theta){
+     return(theta*x)
+}
+
+crit <- function(theta,x,y){
+# must have theta as 1st parameter and return a single value
+     return( )
+}
+
+thbar = 1.8
+x = rep(c(1,3,7,8), length=100)
+y = model(x,thbar) + rnorm(x)
+
+(optim.out <- optim(par=c(1), fn=crit, x=x, y=y,
+     method='L-BFGS-B', lower=c(0.01), upper=c(3.05)))
+```
+
+
+**Exercise 11:** Practice using `nls()` and/or `optim()` on dataset https://euclid.ucc.ie/Eric/st4060/data/nls_test_data1.csv, with model $Y = a\log(bX)$. 
+
+```{r prac-nls-1, exercise = TRUE, exercise.lines=10}
+
+```
+
+```{r prac-nls-1-hint}
+# True parameter values used to generate the data were a = 3, b = 1.3.
+```
+
+**Exercise 12:** Practice using `nls()` and/or `optim()` on dataset https://euclid.ucc.ie/Eric/st4060/data/nls_test_data2.csv, with model $Y = \log(a+bX^3)$. 
+
+```{r prac-nls-2, exercise = TRUE, exercise.lines=10}
+
+```
+
+```{r prac-nls-2-hint}
+# True parameter values used to generate the data were a = 150, b = .8.
+```
+
+
+
+
+<!-- --------------------------------------------------------------------- -->
+## Ridge regression / regularization
+
+First let's set up the data:
+
+```{r the-data, exercise=TRUE, exercise.lines=6, echo=TRUE, eval=TRUE}
+# set up the data
+Hitters = na.omit(Hitters)
+x = model.matrix(Salary~., Hitters)[,-1]
+y = Hitters$Salary
+dim(x); length(y)
+head(x)
+```
+
+**Exercise 1:** perform ridge regression of `y` onto `x` using `glmnet::glmnet()`.
+
+```{r ridge-1, exercise=TRUE}
+ridge.mod = glmnet()
+
+```
+
+```{r ridge-1-solution}
+# ridge regression:
+ridge.mod = glmnet(x,y,alpha=0)
+names(ridge.mod)
+```
+
+Explore the effect of lambda in Exercise 1 by inspecting the output field `ridge.mod$lambda`, and `coef(ridge.mod)[,50]`, for example.
+
+**Exercise 2:** do as in Exercise 1, but now setting your own grid of values  for $\lambda$  (use, say, 100 values arranged in decreasing order so that $\lambda \in \{10^{10},10^{-2}\}$) in 
+$$
+\sum_{i=1}^N\left(Y_i-\beta_0-\sum_{j=1}^p\beta_jX_{ij}\right)^2 + \lambda \sum_{j=1}^p\beta_j^2
+$$
+
+```{r ridge-2, exercise=TRUE}
+ 
+```
+
+```{r ridge-2-hint}
+grid = 10^seq(10,-2,length=100)
+# glmnet(..., alpha=...)
+```
+
+**Exercise 3:** run the LASSO on the same data.
+
+```{r lasso-1, exercise=TRUE}
+ 
+```
+
+```{r lasso-1-hint}
+# LASSO:
+# (... alpha = 1 ...)
+``` 
+
+**Exercise 4:** first, split the data into a training set and a test set. Put the test set aside for now, and ``train'' (i.e. fit) the models on the training data. Once this is done, apply the fitted models to the test set in order to generate predictions and compare prediction perfomrance between ridge regression and the LASSO. Use the same grid for $\lambda$ for both methods.
+
+```{r lasso-mse, exercise=TRUE, exercise.lines=15}
+# first, split the data:
+set.seed(1)
+itrain = sample(c(1:nrow(x)),round(.7*nrow(x))) # 70%-30% split
+x.train = x[itrain,]
+y.train = y[itrain]
+x.test = x[-itrain,]
+y.test = y[-itrain]
+grid = 10^seq(10,-2,length=100)
+
+# ...
+```
+
+```{r lasso-mse-hint} 
+# model fit:
+# ridge.mod = glmnet(...)
+# lasso.mod = glmnet(...)
+
+# predictions:
+# ridge.pred = predict(..., s=2, newx=...)
+# lasso.pred = predict(..., s=2, newx=...)
+
+# compute MSE's
+# mean((...)^2)
+# mean((...)^2)
+```
+
+**Exercise 5:** now set up a loop so as to compute MSE's for varying $\lambda$; the point here is to get a sense of how an appropriate value for $\lambda$ is selected. 
+
+```{r ridge-mse, exercise=TRUE}
+
+```
+
+```{r ridge-mse-hint}
+ridge.mses = lasso.mses = numeric(length(grid))
+ridge.pred = predict(ridge.mod, newx=x.test)
+lasso.pred = predict(lasso.mod, newx=x.test)
+# for(i in 1:...){
+# 	...[i] = mean((ridge.pred[,i]-...)^2)
+# 	...[i] = mean((lasso.pred[,i]-...)^2)
+# }
+plot(ridge.mses, pch=20, t='b')
+points(lasso.mses,col=2,pch=20,t='b')
+```
+
+
+<!-- --------------------------------------------------------------------- -->
+## Density function estimation
+
+We now turn to nonparametric estimation, starting with density estimation. Let's play with KDE's...
+
+**Exercise 1:** what does KDE stand for again?
+
+**Exercise 2:** generate a random sample of 100 points from the Normal distribution N(2,10) and plot a nice histogram for this sample. Then compute an estimate of the probability density function for this sample and add this curve onto the histogram.
+
+```{r kde-1, exercise=TRUE, exercise.lines = 3}
+
+
+```
+
+```{r kde-1-solution}
+x = rnorm(100,2,10)
+hist(x, col='navy', freq=FALSE)
+lines(density(x), lwd=3, col=2)
+```
+
+**Exercise 3:** on from Exercise 2, plot the density estimate (on its own, i.e. not over a histogram) and mark the position of each sample point on the x-axis. 
+
+```{r kde-2, exercise=TRUE, exercise.lines = 3}
+
+
+```
+
+```{r kde-2-solution}
+plot(density(x), lwd=3, col=2)
+rug(x)
+```
+
+
+**Exercise 4:** on from Exercise 3, compute another two density estimates for the same sample: one that yields under-smoothing, and another that yields over-smoothing. Plot and admire. 
+
+```{r kde-3, exercise=TRUE, exercise.lines = 3}
+
+
+```
+
+```{r kde-3-hint}
+?density
+x = rnorm(100,2,10)
+names(density(x))
+
+```
+
+
+<!-- --------------------------------------------------------------------- -->
+## Local polynomial regression
+
+Same idea now applied to regression rather than density estimation. Recall the Prestige example for non-parametric regression in the notes, using `lowess`, an implementation of locally-weighted polynomial regression:
+
+```{r car-ex, echo=TRUE, eval=TRUE}
+f_value = .5
+plot(Prestige$income, Prestige$prestige, xlab="Average income", ylab="Prestige")
+lines(lowess(Prestige$income, Prestige$prestige, f=as.numeric(f_value), iter=0), 
+     lwd=2, col='blue')
+```
+
+In this function, `f` sets the proportion of points that influence the extent of smoothing at each data point. Now change the value of `f` in the code:
+```{r car-ex-edit, exercise=TRUE, exercise.lines = 5}
+f_value = .5
+plot(Prestige$income, Prestige$prestige, xlab="Average income", ylab="Prestige")
+lines(lowess(Prestige$income, Prestige$prestige, f=as.numeric(f_value), iter=0), 
+     lwd=2, col='blue')
+```
+
+
+
+<!-- --------------------------------------------------------------------- -->
+## B-splines
+
+**Exercise:** using dataset `ahmd$mx` from library `MortalityLaws`, plot the crude force of mortality curve.
+
+```{r plot-life, exercise=TRUE, exercise.lines=5}
+age = c(0:110)
+mM = ahmd$mx[,4]
+
+```
+
+```{r plot-life-solution}
+age = c(0:110)
+mM = ahmd$mx[,4]
+plot(age,mM,t='b',pch=20,main="Crude force of mortality (2010)",
+	xlab="Age (years)",ylab="Force of mortality",cex=1.2)
+abline(h=0,lwd=.7,col=8)
+```
+
+**Exercise:** compute bases (i.e. design matrices) for the B-spline, using function `splines::bs()` with respectively 3 and 6 degrees of freedom, and plot these two bases.
+
+```{r bsplines-life-basis, exercise=TRUE, exercise.lines=15}
+
+```
+
+```{r bsplines-life-basis-solution}
+age = c(0:110)
+mM = ahmd$mx[,4]# compute bases:
+BM3 = bs(age)
+BM6 = bs(age,df=6)
+par(mfrow=c(1,2),lwd=2,font=2,font.lab=2,font.axis=2)
+matplot(age,BM3,xlab="Age",ylab="Spline basis",main="3-basis",t='b')
+matplot(age,BM6,xlab="Age",ylab="Spline basis",main="6-basis",t='b')
+```
+
+**Exercise:** Compute the design matrix for 3 dof's and quote the projection for age 40 onto it. Then reconstruct the B-spline approximation to the crude male force data using linear regression. Plot the output over the data points and criticize. 
+
+```{r bsplines-life, exercise=TRUE, exercise.lines=15}
+
+```
+
+```{r bsplines-life-solution}
+age = c(0:110)
+mM = ahmd$mx[,4]
+# compute basis:
+BM = bs(age)
+# fit onto basis:
+lm.out = lm(mM~BM)
+# reconstruct estimate:
+y = numeric(length(age))
+for(i in 1:length(age)){
+	y[i] = as.numeric(sum(lm.out$coef[2:4]*BM[i,])+lm.out$coef[1])
+}
+plot(age,mM,pch=20)
+lines(age,y,t='l',col=4)
+lines(age,fitted(lm.out),t='l',col=2)
+```
+
+
+**Exercise:** Continuing from previous exercise, compute the B-spline as a power series, i.e. compute the traditional cubic spline representation
+$$
+S(x) = \beta_0+\beta_1x+\beta_2x^2+\beta_3x^3+\sum_{j=1}^J \alpha_j(x-x_j)^{3+}
+$$
+where $(x-x_j)^{3+} = max((x-x_j)^3,0)$, using $J=3$ interior knots at 40, 60 and 80. Compare with the fitted values from the regression onto the design matrix obtained from `splines::bs()` for those knots. 
+
+```{r bsplines-life-cted, exercise=TRUE, exercise.lines=15}
+
+```
+
+```{r bsplines-life-cted-solution}
+mM = ahmd$mx[,4]
+x = c(0:110)
+# using bs():
+BM = bs(x,knots=c(40,60,80))
+olmB = lm(mM~BM)
+# construction by hand:
+k40 = pmax((x-40)^3,0)
+k60 = pmax((x-60)^3,0)
+k80 = pmax((x-80)^3,0)
+olm = lm(mM~x+I(x^2)+I(x^3)+k40+k60+k80+0)
+# compare the two:
+plot(x,mM,pch=20)
+lines(x,fitted(olm),col=2)
+lines(x,fitted(olmB),col=4)
+# check whether the two 'bases' are similar:
+par(mfrow=c(1,2))
+matplot(BM)
+POW = cbind(x,(x^2),(x^3),k40,k60,k80)
+matplot(POW)
+```
