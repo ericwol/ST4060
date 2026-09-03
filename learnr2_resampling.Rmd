@@ -1,7 +1,7 @@
 ---
 title: "ST4060/ST6040 -- Section 2: Resampling"
-author: "Statistics, School of Mathematical Sciences, University College Cork"
-date: "2026/27"
+author: "Eric Wolsztynski, Statistics, School of Mathematical Sciences, University College Cork"
+date: "2026-27"
 output: learnr::tutorial
 runtime: shiny_prerendered
 ---
@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = FALSE)
 <!-- --------------------------------------------------------------------- -->
 ## Monte Carlo simulations
 
-**Exercise 1:** generate `M=1000` random samples of `N=100` points from the Normal distribution $\mathcal{N}(\mu=5,\sigma^2=4)$. For each of these `M` samples, compute and store its mean. Then:
+**Exercise 1:** generate `M=1000` random samples of `N=100` points from the Normal distribution ${N}(\mu=5,\sigma^2=4)$. For each of these `M` samples, compute and store its mean. Then:
 
 a. Compute the average of these `M` sample means; is this what you expected?
 

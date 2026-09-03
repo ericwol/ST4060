@@ -1,7 +1,7 @@
 ---
 title: "ST4060/ST6040 -- Section 3: Introduction to Machine Learning"
-author: "Statistics, School of Mathematical Sciences, University College Cork"
-date: "2026/27"
+author: "Eric Wolsztynski, Statistics, School of Mathematical Sciences, University College Cork"
+date: "2026-27"
 output: learnr::tutorial
 runtime: shiny_prerendered
 ---
