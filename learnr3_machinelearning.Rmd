@@ -83,3 +83,80 @@ imbalanced classification problems?
 ```{r logreg-4, exercise = TRUE, exercise.lines = 8}
 
 ```
+
+<!-- --------------------------------------------------------------------- -->
+## Principal Component Analysis
+
+Recall from the notes: PCA re-expresses a set of (possibly correlated)
+variables as a smaller set of uncorrelated components, ordered by the amount
+of variance they explain. Here we first review the mechanics of PCA against
+its underlying eigen-decomposition, then apply it to the `iris` dataset.
+
+**Exercise 1:** generate a 2D correlated dataset with
+```{r pca-setup, exercise = FALSE, echo = TRUE, eval = FALSE}
+set.seed(1)
+n <- 100
+X <- matrix(rnorm(n*2), ncol=2)
+X[,2] <- 0.8*X[,1] + 0.6*X[,2]
+```
+Compute the eigenvalues of the correlation matrix of `X` (using `eigen()`),
+and compare them with the squared standard deviations returned by a scaled
+`prcomp()` on `X`. Are they the same, up to numerical precision?
+
+```{r pca-1, exercise = TRUE, exercise.lines = 10}
+
+```
+
+```{r pca-1-solution}
+set.seed(1)
+n <- 100
+X <- matrix(rnorm(n*2), ncol=2)
+X[,2] <- 0.8*X[,1] + 0.6*X[,2]
+
+Sig <- cor(X)
+ev  <- eigen(Sig, symmetric=TRUE)
+pca <- prcomp(X, scale=TRUE, center=TRUE)
+
+ev$values         # eigenvalues of the correlation matrix
+pca$sdev^2        # squared standard deviations from prcomp
+# these match up to numerical (floating-point) precision
+```
+
+**Exercise 2:** perform PCA of the `iris` dataset (its first 4, numeric,
+columns only), setting both `center` and `scale` to `TRUE`. Using
+`summary()`, determine how many components are needed to capture at least
+90% of the total variance.
+
+```{r pca-2, exercise = TRUE, exercise.lines = 8}
+
+```
+
+```{r pca-2-solution}
+pca.x = prcomp(iris[,1:4], center=TRUE, scale=TRUE)
+summary(pca.x)
+# PC1 alone explains ~73% of variance; PC1+PC2 together explain ~96%,
+# so 2 components are already enough to pass the 90% threshold
+```
+
+**Exercise 3:** create a scatterplot of the first two principal components
+from Exercise 2, colouring points by `iris$Species`. Compare this with a
+scatterplot of the two original variables `Sepal.Length` and `Sepal.Width`,
+also coloured by species. Which of the two plots separates the three species
+more clearly?
+
+```{r pca-3, exercise = TRUE, exercise.lines = 10}
+
+```
+
+```{r pca-3-hint}
+pca.x = prcomp(iris[,1:4], center=TRUE, scale=TRUE)
+par(mfrow=c(1,2), pch=20)
+plot(iris$Sepal.Length, iris$Sepal.Width, col=iris$Species,
+     xlab="Sepal.Length", ylab="Sepal.Width", main="Original variables")
+plot(pca.x$x[,1], pca.x$x[,2], col=iris$Species,
+     xlab="PC1", ylab="PC2", main="First two PCs")
+# The PC1-PC2 plot separates the three species much more clearly than the
+# original Sepal.Length/Sepal.Width plot, particularly versicolor vs
+# virginica -- consistent with PC1 pooling information from all 4 original
+# (correlated) variables rather than just 2 of them.
+```
